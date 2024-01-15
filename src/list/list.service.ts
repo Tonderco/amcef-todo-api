@@ -6,6 +6,7 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
 import { List } from './schemas/list.schema';
+import { User } from '../auth/schemas/user.schema';
 
 @Injectable()
 export class ListService {
@@ -18,8 +19,12 @@ export class ListService {
     return this.listModel.find();
   }
 
-  async create(list: List): Promise<List> {
-    return this.listModel.create(list);
+  async create(list: List, user: User): Promise<List> {
+    const data: { name: string; users: User[] } = {
+      name: list.name,
+      users: [user],
+    };
+    return this.listModel.create(data);
   }
 
   async findById(id: string): Promise<List> {

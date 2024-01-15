@@ -6,6 +6,7 @@ import {
   Param,
   Post,
   Put,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { ListService } from './list.service';
@@ -25,8 +26,11 @@ export class ListController {
 
   @Post()
   @UseGuards(AuthGuard())
-  async createList(@Body() list: CreateListDto): Promise<List> {
-    return this.listService.create(list);
+  async createList(
+    @Body() list: CreateListDto,
+    @Req() req: any,
+  ): Promise<List> {
+    return this.listService.create(list, req.user);
   }
 
   @Get(':id')
