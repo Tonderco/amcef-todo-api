@@ -2,11 +2,13 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
 import { List } from './schemas/list.schema';
 import { User } from '../auth/schemas/user.schema';
+import { ListItem } from '../list-item/schemas/list-item.schema';
 
 @Injectable()
 export class ListService {
@@ -45,14 +47,47 @@ export class ListService {
     return list;
   }
 
-  async updateById(id: string, list: List): Promise<List> {
+  async updateById(id: string, list: List, user: User): Promise<List> {
+    if ((await this.isOwner(user, id)) === false) {
+      throw new UnauthorizedException('You are not an owner of this list');
+    }
+
     return this.listModel.findByIdAndUpdate(id, list, {
       new: true,
       runValidators: true,
     });
   }
 
-  async deleteById(id: string): Promise<List> {
+  async deleteById(id: string, user: User): Promise<List> {
+    if ((await this.isOwner(user, id)) === false) {
+      throw new UnauthorizedException('You are not an owner of this list');
+    }
+
     return this.listModel.findByIdAndDelete(id);
+  }
+
+  async isOwner(user: User, id: string): Promise<boolean> {
+    const list: List = await this.listModel.findById(id);
+    return list.users.some((listUser) => listUser._id.equals(user._id));
+  }
+
+  async addListItem(listId: string, newListItem: ListItem): Promise<List> {
+    const list = await this.listModel.findById(listId);
+    if (!list) {
+      throw new NotFoundException(`List with ID ${listId} not found`);
+    }
+
+    const listItemIndex = list.listItems.findIndex((item) =>
+      item._id.equals(newListItem._id),
+    );
+
+    if (listItemIndex > -1) {
+      list.listItems[listItemIndex] = newListItem;
+    } else {
+      list.listItems.push(newListItem);
+    }
+
+    await list.save();
+    return list;
   }
 }

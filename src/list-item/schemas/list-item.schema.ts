@@ -1,4 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document } from 'mongoose';
 
 export enum ItemListFlag {
   ACTIVE = 'Active',
@@ -9,10 +10,7 @@ export enum ItemListFlag {
 @Schema({
   timestamps: true,
 })
-export class ListItem {
-  @Prop()
-  name: string;
-
+export class ListItem extends Document {
   @Prop()
   title: string;
 
@@ -20,10 +18,13 @@ export class ListItem {
   text: string;
 
   @Prop()
-  deadline: Date;
+  deadline: string;
 
   @Prop()
   creator: string;
+
+  @Prop()
+  listID: string;
 
   @Prop()
   flag: ItemListFlag;

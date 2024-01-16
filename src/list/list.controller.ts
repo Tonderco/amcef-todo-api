@@ -30,7 +30,7 @@ export class ListController {
     @Body() list: CreateListDto,
     @Req() req: any,
   ): Promise<List> {
-    return this.listService.create(list, req.user);
+    return this.listService.create(list as List, req.user);
   }
 
   @Get(':id')
@@ -44,13 +44,14 @@ export class ListController {
   async updateList(
     @Param('id') id: string,
     @Body() list: UpdateListDto,
+    @Req() req: any,
   ): Promise<List> {
-    return this.listService.updateById(id, list);
+    return this.listService.updateById(id, list as List, req.user);
   }
 
   @Delete(':id')
   @UseGuards(AuthGuard())
-  async deleteList(@Param('id') id: string): Promise<List> {
-    return this.listService.deleteById(id);
+  async deleteList(@Param('id') id: string, @Req() req: any): Promise<List> {
+    return this.listService.deleteById(id, req.user);
   }
 }
