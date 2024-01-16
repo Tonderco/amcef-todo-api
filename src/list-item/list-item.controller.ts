@@ -34,7 +34,7 @@ export class ListItemController {
     return this.listItemService.create(listItem as ListItem, req.user, listID);
   }
 
-  @Put(':listID/set-flag/:listItemID')
+  @Put(':listID/:listItemID/set-flag')
   @UseGuards(AuthGuard())
   async setListItemFlag(
     @Body() listItem: UpdateListItemDto,
@@ -50,7 +50,7 @@ export class ListItemController {
     );
   }
 
-  @Put(':listID/update/:listItemID')
+  @Put(':listID/:listItemID')
   @UseGuards(AuthGuard())
   async updateListItem(
     @Body() listItem: UpdateListItemDto,
@@ -66,7 +66,7 @@ export class ListItemController {
     );
   }
 
-  @Delete(':listID/delete/:listItemID')
+  @Delete(':listID/:listItemID')
   @UseGuards(AuthGuard())
   async deleteListItem(
     @Req() req: any,
