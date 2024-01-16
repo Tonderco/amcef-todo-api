@@ -123,4 +123,24 @@ export class ListService {
     await list.save();
     return list;
   }
+
+  async deleteListItem(listID: string, listItemID: string): Promise<void> {
+    const list = await this.listModel.findById(listID);
+    if (!list) {
+      throw new NotFoundException(`List with ID ${listID} not found`);
+    }
+
+    const listItemIndex = list.listItems.findIndex((item) =>
+      item._id.equals(listItemID),
+    );
+
+    if (listItemIndex > -1) {
+      list.listItems.splice(listItemIndex, 1);
+      await list.save();
+    } else {
+      throw new NotFoundException(
+        `List item with ID ${listItemID} not found in the list`,
+      );
+    }
+  }
 }

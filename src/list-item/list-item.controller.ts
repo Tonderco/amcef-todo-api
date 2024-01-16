@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
@@ -41,11 +42,37 @@ export class ListItemController {
     @Param('listID') listID: string,
     @Param('listItemID') listItemID: string,
   ): Promise<ListItem> {
-    return this.listItemService.setFlag(
+    return this.listItemService.updateListItem(
       listItem as ListItem,
       req.user,
       listID,
       listItemID,
     );
+  }
+
+  @Put(':listID/update/:listItemID')
+  @UseGuards(AuthGuard())
+  async updateListItem(
+    @Body() listItem: UpdateListItemDto,
+    @Req() req: any,
+    @Param('listID') listID: string,
+    @Param('listItemID') listItemID: string,
+  ): Promise<ListItem> {
+    return this.listItemService.updateListItem(
+      listItem as ListItem,
+      req.user,
+      listID,
+      listItemID,
+    );
+  }
+
+  @Delete(':listID/delete/:listItemID')
+  @UseGuards(AuthGuard())
+  async deleteListItem(
+    @Req() req: any,
+    @Param('listID') listID: string,
+    @Param('listItemID') listItemID: string,
+  ): Promise<ListItem> {
+    return this.listItemService.deleteListItem(req.user, listID, listItemID);
   }
 }

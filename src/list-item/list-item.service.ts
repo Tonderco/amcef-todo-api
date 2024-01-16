@@ -60,14 +60,14 @@ export class ListItemService {
     return createdListItem;
   }
 
-  async setFlag(
+  async updateListItem(
     listItem: ListItem,
     user: User,
     listID: string,
     listItemID: string,
   ): Promise<ListItem> {
     const isValidListId: boolean = mongoose.isValidObjectId(listID);
-    const isValidListItemId: boolean = mongoose.isValidObjectId(listID);
+    const isValidListItemId: boolean = mongoose.isValidObjectId(listItemID);
 
     if (!isValidListId) {
       console.log('BAD REQUEST EXCEPTION IN LIST SERVICE FIND BY ID FUNCTION');
@@ -90,5 +90,32 @@ export class ListItemService {
     await this.listService.addListItem(listID, updatedListItem);
 
     return updatedListItem;
+  }
+
+  async deleteListItem(
+    user: User,
+    listID: string,
+    listItemID: string,
+  ): Promise<ListItem> {
+    const isValidListId: boolean = mongoose.isValidObjectId(listID);
+    const isValidListItemId: boolean = mongoose.isValidObjectId(listItemID);
+
+    if (!isValidListId) {
+      console.log('BAD REQUEST EXCEPTION IN LIST SERVICE FIND BY ID FUNCTION');
+      throw new BadRequestException('Please enter the correct list id format');
+    } else if (!isValidListItemId) {
+      console.log('BAD REQUEST EXCEPTION IN LIST SERVICE FIND BY ID FUNCTION');
+      throw new BadRequestException(
+        'Please enter the correct list item id format',
+      );
+    }
+
+    if ((await this.listService.isOwner(user, listID)) === false) {
+      throw new UnauthorizedException('You are not an owner of this list');
+    }
+
+    await this.listService.deleteListItem(listID, listItemID);
+
+    return this.listItemModel.findByIdAndDelete(listItemID);
   }
 }
