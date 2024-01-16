@@ -14,6 +14,7 @@ import { List } from './schemas/list.schema';
 import { CreateListDto } from './dto/create-list-dto';
 import { UpdateListDto } from './dto/update-list-dto';
 import { AuthGuard } from '@nestjs/passport';
+import { AddOwnerDto } from './dto/add-owner-dto';
 
 @Controller('lists')
 export class ListController {
@@ -53,5 +54,15 @@ export class ListController {
   @UseGuards(AuthGuard())
   async deleteList(@Param('id') id: string, @Req() req: any): Promise<List> {
     return this.listService.deleteById(id, req.user);
+  }
+
+  @Put(':id/add-owner')
+  @UseGuards(AuthGuard())
+  async addUser(
+    @Param('id') id: string,
+    @Req() req: any,
+    @Body() body: AddOwnerDto,
+  ): Promise<List> {
+    return this.listService.addOwnerToList(id, req.user, body.email);
   }
 }

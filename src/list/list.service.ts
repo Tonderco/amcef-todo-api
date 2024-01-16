@@ -15,6 +15,8 @@ export class ListService {
   constructor(
     @InjectModel(List.name)
     private listModel: mongoose.Model<List>,
+    @InjectModel(User.name)
+    private userModel: mongoose.Model<User>,
   ) {}
 
   async findAll(): Promise<List[]> {
@@ -64,6 +66,37 @@ export class ListService {
     }
 
     return this.listModel.findByIdAndDelete(id);
+  }
+
+  async addOwnerToList(id: string, user: User, email: string): Promise<List> {
+    if ((await this.isOwner(user, id)) === false) {
+      throw new UnauthorizedException('You are not an owner of this list');
+    }
+
+    const newUser: User = await this.userModel.findOne({ email: email });
+    if (!newUser) {
+      throw new NotFoundException(`User with email ${email} not found`);
+    }
+
+    const list = await this.listModel.findById(id);
+    if (!list) {
+      throw new NotFoundException(`List with ID ${id} not found`);
+    }
+
+    const isAlreadyUser = list.users.some((u: User) =>
+      u._id.equals(newUser._id),
+    );
+
+    if (!isAlreadyUser) {
+      list.users.push(newUser);
+      await list.save();
+    } else {
+      throw new BadRequestException(
+        `User with email ${email} is already an owner of the list`,
+      );
+    }
+
+    return list;
   }
 
   async isOwner(user: User, id: string): Promise<boolean> {
